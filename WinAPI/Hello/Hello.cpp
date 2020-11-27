@@ -83,6 +83,15 @@ BOOL InitInstance(HINSTANCE hInst, int nCmdShow)
 	
 	// ウィンドウを更新
 	UpdateWindow(hWnd);
+
+	// 文字列描画
+	{
+		LPCTSTR lpszTxt = TEXT("猫でもわかるWindowsプログラミング");
+		HDC hdc;
+		hdc = GetDC(hWnd);
+		TextOut(hdc, 10, 10, lpszTxt, lstrlen(lpszTxt));
+		ReleaseDC(hWnd, hdc);
+	}
 	
 	return TRUE;
 }
