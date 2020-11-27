@@ -62,7 +62,7 @@ BOOL InitInstance(HINSTANCE hInst, int nCmdShow)
 	HWND hWnd;
 
 	hWnd = CreateWindow(szClassName, // クラス名
-		TEXT("猫でもわかるWindowsプログラミング"), // ウィンドウ名
+		TEXT("Hello Windows!"), // ウィンドウ名
 		WS_OVERLAPPEDWINDOW,     // ウィンドウスタイル
 		CW_USEDEFAULT,           // x位置
 		CW_USEDEFAULT,           // y位置
