@@ -90,7 +90,16 @@ BOOL InitInstance(HINSTANCE hInst, int nCmdShow)
 // ウィンドウプロシージャ
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
+	PAINTSTRUCT ps;
+	HDC hdc;
+	LPCTSTR lpszStr = TEXT("猫でもわかるWindowsプログラミング");
+
 	switch (msg) {
+	case WM_PAINT:
+		hdc = BeginPaint(hWnd, &ps); // デバイスコンテキストを取得
+		TextOut(hdc, 10, 10, lpszStr, lstrlen(lpszStr)); // 文字列を描画
+		EndPaint(hWnd, &ps); // 描画処理を終了
+		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
