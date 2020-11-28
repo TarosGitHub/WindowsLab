@@ -3,6 +3,7 @@
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 ATOM InitApp(HINSTANCE hInst);
 BOOL InitInstance(HINSTANCE hInst, int nCmdShow);
+HFONT MyCreateFont(int nHeight, DWORD dwCharSet, LPCTSTR lpName);
 
 // ウィンドウクラス
 TCHAR szClassName[] = TEXT("sample01");
@@ -90,35 +91,49 @@ BOOL InitInstance(HINSTANCE hInst, int nCmdShow)
 // ウィンドウプロシージャ
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
+	static HFONT hFont1;
+	static HFONT hFont2;
+	static HFONT hFont3;
 	PAINTSTRUCT ps;
 	HDC hdc;
-	RECT rc;
-	WCHAR str[] = L"猫でもわかる\nWindowsプログラミング\n\t"
-		          L"WinAPI 太郎";
-	LPWSTR lpwzStr = str;
-	DRAWTEXTPARAMS dtp;
+	LPCTSTR lpszName1 = TEXT("星野太郎");
+	LPCTSTR lpszName2 = TEXT("Hoshino Taro");
 
 	switch (msg) {
+	case WM_CREATE:
+		hFont1 = MyCreateFont(40, SHIFTJIS_CHARSET, TEXT("HG行書体"));
+		hFont2 = MyCreateFont(40, ANSI_CHARSET, TEXT("Fraktur JS"));
+		hFont3 = MyCreateFont(40, SHIFTJIS_CHARSET, TEXT("ＭＳ 明朝"));
+		break;
+
 	case WM_PAINT:
-		GetClientRect(hWnd, &rc);
-
-		// フォーマットの設定
-		dtp.cbSize = sizeof(DRAWTEXTPARAMS);
-		dtp.iLeftMargin = 20;
-		dtp.iRightMargin = 20;
-		dtp.iTabLength = 4;
-
 		hdc = BeginPaint(hWnd, &ps); // デバイスコンテキストを取得
-		SetTextColor(hdc, RGB(255, 0, 255));
-		DrawTextEx(hdc, lpwzStr, -1, &rc, DT_WORDBREAK | DT_EXPANDTABS | DT_TABSTOP, &dtp); // 文字列を描画
+		SelectObject(hdc, hFont1);
+		TextOut(hdc, 0, 0, lpszName1, lstrlen(lpszName1));
+		SelectObject(hdc, hFont2);
+		TextOut(hdc, 0, 60, lpszName2, lstrlen(lpszName2));
+		SelectObject(hdc, hFont3);
+		TextOut(hdc, 0, 120, lpszName1, lstrlen(lpszName1));
 		EndPaint(hWnd, &ps); // 描画処理を終了
 		break;
+
 	case WM_DESTROY:
+		DeleteObject(hFont1);
+		DeleteObject(hFont2);
+		DeleteObject(hFont3);
 		PostQuitMessage(0);
 		break;
+
 	default:
 		return (DefWindowProc(hWnd, msg, wp, lp));
 	}
 
 	return 0;
+}
+
+// 論理フォントを作成し、そのフォントのハンドルを返す
+HFONT MyCreateFont(int nHeight, DWORD dwCharSet, LPCTSTR lpName)
+{
+	return CreateFont(nHeight, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, dwCharSet,
+		OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, lpName);
 }
