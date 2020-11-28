@@ -92,12 +92,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	PAINTSTRUCT ps;
 	HDC hdc;
-	LPCTSTR lpszStr = TEXT("猫でもわかるWindowsプログラミング");
+	RECT rc;
+	LPCTSTR lpszStr = TEXT("猫でもわかる\nWindowsプログラミング");
 
 	switch (msg) {
 	case WM_PAINT:
+		GetClientRect(hWnd, &rc);
 		hdc = BeginPaint(hWnd, &ps); // デバイスコンテキストを取得
-		TextOut(hdc, 10, 10, lpszStr, lstrlen(lpszStr)); // 文字列を描画
+		DrawText(hdc, lpszStr, -1, &rc, DT_CENTER | DT_WORDBREAK); // 文字列を描画
 		EndPaint(hWnd, &ps); // 描画処理を終了
 		break;
 	case WM_DESTROY:
