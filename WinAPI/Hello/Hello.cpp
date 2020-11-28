@@ -93,13 +93,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 	PAINTSTRUCT ps;
 	HDC hdc;
 	RECT rc;
-	LPCTSTR lpszStr = TEXT("猫でもわかる\nWindowsプログラミング");
+	WCHAR str[] = L"猫でもわかる\nWindowsプログラミング\n\t"
+		          L"WinAPI 太郎";
+	LPWSTR lpwzStr = str;
+	DRAWTEXTPARAMS dtp;
 
 	switch (msg) {
 	case WM_PAINT:
 		GetClientRect(hWnd, &rc);
+
+		// フォーマットの設定
+		dtp.cbSize = sizeof(DRAWTEXTPARAMS);
+		dtp.iLeftMargin = 20;
+		dtp.iRightMargin = 20;
+		dtp.iTabLength = 4;
+
 		hdc = BeginPaint(hWnd, &ps); // デバイスコンテキストを取得
-		DrawText(hdc, lpszStr, -1, &rc, DT_CENTER | DT_WORDBREAK); // 文字列を描画
+		SetTextColor(hdc, RGB(255, 0, 255));
+		DrawTextEx(hdc, lpwzStr, -1, &rc, DT_WORDBREAK | DT_EXPANDTABS | DT_TABSTOP, &dtp); // 文字列を描画
 		EndPaint(hWnd, &ps); // 描画処理を終了
 		break;
 	case WM_DESTROY:
