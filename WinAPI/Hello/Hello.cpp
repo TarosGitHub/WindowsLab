@@ -1,10 +1,8 @@
 ﻿#include <windows.h>
-#include <time.h>
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 ATOM InitApp(HINSTANCE hInst);
 BOOL InitInstance(HINSTANCE hInst, int nCmdShow);
-HFONT MyCreateFont(int nHeight, DWORD dwCharSet, LPCTSTR lpName);
 
 // ウィンドウクラス
 TCHAR szClassName[] = TEXT("sample01");
@@ -92,27 +90,33 @@ BOOL InitInstance(HINSTANCE hInst, int nCmdShow)
 // ウィンドウプロシージャ
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	int i, x, y, r, g, b;
 	HDC hdc;
 	PAINTSTRUCT ps;
-	RECT rc;
+	HPEN hPen1, hPen2, hPen3;
 
 	switch (msg) {
-	case WM_CREATE:
-		srand((unsigned)time(NULL));
-		break;
-
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps); // デバイスコンテキストを取得
-		GetClientRect(hWnd, &rc);
-		for (i = 0; i < 100000; i++) {
-			x = rand() % rc.right;
-			y = rand() % rc.bottom;
-			r = rand() % 256;
-			g = rand() % 256;
-			b = rand() % 256;
-			SetPixelV(hdc, x, y, RGB(r, g, b));
-		}
+
+		hPen1 = CreatePen(PS_SOLID, 3, RGB(255, 0, 0));
+		SelectObject(hdc, hPen1);
+		MoveToEx(hdc, 20, 20, NULL);
+		LineTo(hdc, 250, 20);
+
+		hPen2 = CreatePen(PS_DASH, 0, RGB(0, 0, 255));
+		SelectObject(hdc, hPen2);
+		MoveToEx(hdc, 20, 40, NULL);
+		LineTo(hdc, 250, 40);
+
+		hPen3 = CreatePen(PS_DOT, 0, RGB(0, 255, 0));
+		SelectObject(hdc, hPen3);
+		MoveToEx(hdc, 20, 60, NULL);
+		LineTo(hdc, 250, 60);
+
+		DeleteObject(hPen1);
+		DeleteObject(hPen2);
+		DeleteObject(hPen3);
+
 		EndPaint(hWnd, &ps); // 描画処理を終了
 		break;
 
@@ -125,11 +129,4 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 	}
 
 	return 0;
-}
-
-// 論理フォントを作成し、そのフォントのハンドルを返す
-HFONT MyCreateFont(int nHeight, DWORD dwCharSet, LPCTSTR lpName)
-{
-	return CreateFont(nHeight, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, dwCharSet,
-		OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, lpName);
 }
