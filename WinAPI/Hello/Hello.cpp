@@ -92,30 +92,49 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	HDC hdc;
 	PAINTSTRUCT ps;
-	HPEN hPen1, hPen2, hPen3;
+	HPEN hPen, hOldPen;
+	HBRUSH hBrush, hOldBrush;
 
 	switch (msg) {
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps); // デバイスコンテキストを取得
 
-		hPen1 = CreatePen(PS_SOLID, 3, RGB(255, 0, 0));
-		SelectObject(hdc, hPen1);
-		MoveToEx(hdc, 20, 20, NULL);
-		LineTo(hdc, 250, 20);
+		hPen = CreatePen(PS_SOLID, 0, RGB(255, 0, 0));
+		hOldPen = (HPEN)SelectObject(hdc, hPen);
 
-		hPen2 = CreatePen(PS_DASH, 0, RGB(0, 0, 255));
-		SelectObject(hdc, hPen2);
-		MoveToEx(hdc, 20, 40, NULL);
-		LineTo(hdc, 250, 40);
+		hBrush = CreateSolidBrush(RGB(0, 255, 0));
+		hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
+		Rectangle(hdc, 10, 10, 100, 100);
+		DeleteObject(hBrush);
 
-		hPen3 = CreatePen(PS_DOT, 0, RGB(0, 255, 0));
-		SelectObject(hdc, hPen3);
-		MoveToEx(hdc, 20, 60, NULL);
-		LineTo(hdc, 250, 60);
+		hBrush = CreateHatchBrush(HS_BDIAGONAL, RGB(0, 255, 0));
+		hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
+		Rectangle(hdc, 50, 50, 150, 150);
+		DeleteObject(hBrush);
 
-		DeleteObject(hPen1);
-		DeleteObject(hPen2);
-		DeleteObject(hPen3);
+		hBrush = CreateHatchBrush(HS_FDIAGONAL, RGB(0, 0, 255));
+		hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
+		Rectangle(hdc, 100, 100, 200, 200);
+		DeleteObject(hBrush);
+
+		hBrush = CreateHatchBrush(HS_CROSS, RGB(255, 0, 255));
+		hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
+		Rectangle(hdc, 150, 150, 250, 250);
+		DeleteObject(hBrush);
+
+		hBrush = CreateHatchBrush(HS_DIAGCROSS, RGB(255, 255, 0));
+		hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
+		Rectangle(hdc, 200, 200, 300, 300);
+		DeleteObject(hBrush);
+
+		hBrush = (HBRUSH)GetStockObject(NULL_BRUSH);
+		hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
+		Rectangle(hdc, 250, 250, 350, 350);
+		DeleteObject(hBrush);
+
+		DeleteObject(hPen);
+		SelectObject(hdc, hOldPen);
+		SelectObject(hdc, hOldBrush);
 
 		EndPaint(hWnd, &ps); // 描画処理を終了
 		break;
