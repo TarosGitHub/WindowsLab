@@ -90,51 +90,41 @@ BOOL InitInstance(HINSTANCE hInst, int nCmdShow)
 // ウィンドウプロシージャ
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
+	int iOldMode;
 	HDC hdc;
 	PAINTSTRUCT ps;
 	HPEN hPen, hOldPen;
 	HBRUSH hBrush, hOldBrush;
+	COLORREF crOldColor;
+	RECT rc1 = { 30, 30, 210, 50 };
+	RECT rc2 = { 30, 50, 210, 110 };
+	LPCTSTR lpszTxt1 = TEXT("Windows 太郎");
+	LPCTSTR lpszTxt2 = TEXT("猫でもわかる\nWindows\nプログラミング");
 
 	switch (msg) {
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps); // デバイスコンテキストを取得
 
-		hPen = CreatePen(PS_SOLID, 0, RGB(255, 0, 0));
+		hPen = CreatePen(PS_NULL, 0, RGB(0, 0, 0));
 		hOldPen = (HPEN)SelectObject(hdc, hPen);
-
-		hBrush = CreateSolidBrush(RGB(0, 255, 0));
+		hBrush = CreateSolidBrush(RGB(255, 200, 255));
 		hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
-		Rectangle(hdc, 10, 10, 100, 100);
-		DeleteObject(hBrush);
 
-		hBrush = CreateHatchBrush(HS_BDIAGONAL, RGB(0, 255, 0));
-		hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
-		Rectangle(hdc, 50, 50, 150, 150);
-		DeleteObject(hBrush);
+		// 角の丸い四角形を描画
+		RoundRect(hdc, 20, 20, 220, 120, 10, 10);
 
-		hBrush = CreateHatchBrush(HS_FDIAGONAL, RGB(0, 0, 255));
-		hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
-		Rectangle(hdc, 100, 100, 200, 200);
-		DeleteObject(hBrush);
-
-		hBrush = CreateHatchBrush(HS_CROSS, RGB(255, 0, 255));
-		hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
-		Rectangle(hdc, 150, 150, 250, 250);
-		DeleteObject(hBrush);
-
-		hBrush = CreateHatchBrush(HS_DIAGCROSS, RGB(255, 255, 0));
-		hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
-		Rectangle(hdc, 200, 200, 300, 300);
-		DeleteObject(hBrush);
-
-		hBrush = (HBRUSH)GetStockObject(NULL_BRUSH);
-		hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
-		Rectangle(hdc, 250, 250, 350, 350);
-		DeleteObject(hBrush);
+		// 文字列を描画
+		crOldColor = SetTextColor(hdc, RGB(0, 0, 255));
+		DrawText(hdc, lpszTxt1, -1, &rc1, DT_CENTER);
+		iOldMode = SetBkMode(hdc, TRANSPARENT);
+		DrawText(hdc, lpszTxt2, -1, &rc2, DT_CENTER);
 
 		DeleteObject(hPen);
+		DeleteObject(hBrush);
 		SelectObject(hdc, hOldPen);
 		SelectObject(hdc, hOldBrush);
+		SetTextColor(hdc, crOldColor);
+		SetBkMode(hdc, iOldMode);
 
 		EndPaint(hWnd, &ps); // 描画処理を終了
 		break;
