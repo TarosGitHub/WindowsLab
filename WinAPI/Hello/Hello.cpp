@@ -1,13 +1,16 @@
 ﻿#include <windows.h>
+#include "resource.h"
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 ATOM InitApp(HINSTANCE hInst);
 BOOL InitInstance(HINSTANCE hInst, int nCmdShow);
 
 // ウィンドウクラス
-TCHAR szClassName[] = TEXT("bitmap01");
+TCHAR szClassName[] = TEXT("bitmap02");
 
 HINSTANCE hInst;
+HDC hdc_mem1, hdc_mem2;
+int show_no = 1;
 
 int WINAPI WinMain(HINSTANCE hCurInst, HINSTANCE hPrevInst, LPSTR lpsCmdLine, int nCmdShow)
 {
@@ -52,7 +55,7 @@ ATOM InitApp(HINSTANCE hInst)
 	wc.hIcon = (HICON)LoadImage(NULL, MAKEINTRESOURCE(IDI_APPLICATION),	IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED); // アイコン
 	wc.hCursor = (HCURSOR)LoadImage(NULL, MAKEINTRESOURCE(IDC_ARROW), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE | LR_SHARED); // カーソル
 	wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH); // 背景ブラシ
-	wc.lpszMenuName = NULL;                   // メニュー名
+	wc.lpszMenuName = TEXT("MYMENU");         // メニュー名
 	wc.lpszClassName = szClassName;           // クラス名
 	wc.hIconSm = (HICON)LoadImage(NULL, MAKEINTRESOURCE(IDI_APPLICATION), IMAGE_ICON, 0, 0,	LR_DEFAULTSIZE | LR_SHARED); // 小さいアイコン
 
@@ -93,41 +96,74 @@ BOOL InitInstance(HINSTANCE hInst, int nCmdShow)
 // ウィンドウプロシージャ
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	HDC hdc, hdc_mem;
+	HDC hdc;
 	PAINTSTRUCT ps;
 	HBITMAP hBmp;
-	BITMAP bmp_info;
-	int w, h;
+	HDC hdc_memx;
 
 	switch (msg) {
+	case WM_CREATE:
+		hdc = GetDC(hWnd);
+
+		// メモリデバイスコンテキストhdc_mem1にビットマップリソースMYBMP1を読み込む
+		hBmp = LoadBitmap(hInst, TEXT("MYBMP1"));
+		hdc_mem1 = CreateCompatibleDC(hdc);
+		SelectObject(hdc_mem1, hBmp);
+		DeleteObject(hBmp);
+
+		// メモリデバイスコンテキストhdc_mem2にビットマップリソースMYBMP2を読み込む
+		hBmp = LoadBitmap(hInst, TEXT("MYBMP2"));
+		hdc_mem2 = CreateCompatibleDC(hdc);
+		SelectObject(hdc_mem2, hBmp);
+		DeleteObject(hBmp);
+
+		ReleaseDC(hWnd, hdc);
+		break;
+
 	case WM_PAINT:
-		hdc = BeginPaint(hWnd, &ps); // デバイスコンテキストを取得
+		BeginPaint(hWnd, &ps); // デバイスコンテキストを取得
 
-		// ビットマップリソース「MYBMP」を読み込む
-		hBmp = LoadBitmap(hInst, TEXT("MYBMP"));
-
-		// ビットマップの情報を取得
-		GetObject(hBmp, (int)sizeof(BITMAP), &bmp_info);
-		w = bmp_info.bmWidth;
-		h = bmp_info.bmHeight;
-
-		// メモリデバイスコンテキストを作成
-		hdc_mem = CreateCompatibleDC(hdc);
-
-		// メモリデバイスコンテキストにビットマップを選択
-		SelectObject(hdc_mem, hBmp);
+		if (1 == show_no) {
+			hdc_memx = hdc_mem1;
+		}
+		else if (2 == show_no) {
+			hdc_memx = hdc_mem2;
+		}
+		else {
+			hdc_memx = hdc_mem1;
+		}
 
 		// ビットマップを転送
-		BitBlt(hdc, 0, 0, w, h, hdc_mem, 0, 0, SRCCOPY);
-		StretchBlt(hdc, w, 0, w * 2, h * 2, hdc_mem, 0, 0, w, h, SRCCOPY);
-
-		DeleteDC(hdc_mem);
-		DeleteObject(hBmp);
+		BitBlt(ps.hdc, ps.rcPaint.left, ps.rcPaint.top,
+			ps.rcPaint.right - ps.rcPaint.left,
+			ps.rcPaint.bottom - ps.rcPaint.top,
+			hdc_memx, ps.rcPaint.left, ps.rcPaint.top, SRCCOPY);
 
 		EndPaint(hWnd, &ps); // 描画処理を終了
 		break;
 
+	case WM_COMMAND:
+		// メニュー項目の選択時の処理
+		switch (LOWORD(wp)) {
+		case IDM_CAT1:
+			show_no = 1;
+			InvalidateRect(hWnd, NULL, TRUE); // 無効領域の発生(WM_PAINTメッセージの送信)
+			break;
+
+		case IDM_CAT2:
+			show_no = 2;
+			InvalidateRect(hWnd, NULL, TRUE); // 無効領域の発生(WM_PAINTメッセージの送信)
+			break;
+
+		case IDM_END:
+			SendMessage(hWnd, WM_CLOSE, 0, 0); // WM_CLOSEメッセージ送信 -> DestroyWindow関数の自動実行 -> WM_DESTROYメッセージ発生
+			break;
+		}
+		break;
+
 	case WM_DESTROY:
+		DeleteDC(hdc_mem1);
+		DeleteDC(hdc_mem2);
 		PostQuitMessage(0);
 		break;
 
