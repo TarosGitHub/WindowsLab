@@ -5,12 +5,15 @@ ATOM InitApp(HINSTANCE hInst);
 BOOL InitInstance(HINSTANCE hInst, int nCmdShow);
 
 // ウィンドウクラス
-TCHAR szClassName[] = TEXT("sample01");
+TCHAR szClassName[] = TEXT("bitmap01");
+
+HINSTANCE hInst;
 
 int WINAPI WinMain(HINSTANCE hCurInst, HINSTANCE hPrevInst, LPSTR lpsCmdLine, int nCmdShow)
 {
 	MSG msg;
 	BOOL bRet;
+	hInst = hCurInst;
 
 	// ウィンドウクラスの登録
 	if (!InitApp(hCurInst)) {
@@ -90,38 +93,36 @@ BOOL InitInstance(HINSTANCE hInst, int nCmdShow)
 // ウィンドウプロシージャ
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	HDC hdc;
+	HDC hdc, hdc_mem;
 	PAINTSTRUCT ps;
-	HPEN hPen, hOldPen;
-	HBRUSH hBrush, hOldBrush;
+	HBITMAP hBmp;
+	BITMAP bmp_info;
+	int w, h;
 
 	switch (msg) {
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps); // デバイスコンテキストを取得
 
-		// 楕円を描画
-		Ellipse(hdc, 10, 10, 110, 60);
+		// ビットマップリソース「MYBMP」を読み込む
+		hBmp = LoadBitmap(hInst, TEXT("MYBMP"));
 
-		// 扇形を描画
-		Pie(hdc, 120, 10, 220, 60, 250, 20, 100, 90);
+		// ビットマップの情報を取得
+		GetObject(hBmp, (int)sizeof(BITMAP), &bmp_info);
+		w = bmp_info.bmWidth;
+		h = bmp_info.bmHeight;
 
-		hPen = CreatePen(PS_DOT, 0, RGB(255, 0, 0));
-		hOldPen = (HPEN)SelectObject(hdc, hPen);
-		hBrush = (HBRUSH)GetStockObject(NULL_BRUSH);
-		hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
+		// メモリデバイスコンテキストを作成
+		hdc_mem = CreateCompatibleDC(hdc);
 
-		// 説明のための長方形を描画
-		Rectangle(hdc, 10, 10, 110, 60);
-		Rectangle(hdc, 120, 10, 220, 60);
-		MoveToEx(hdc, 170, 35, NULL);
-		LineTo(hdc, 250, 20);
-		MoveToEx(hdc, 170, 35, NULL);
-		LineTo(hdc, 100, 90);
+		// メモリデバイスコンテキストにビットマップを選択
+		SelectObject(hdc_mem, hBmp);
 
-		DeleteObject(hPen);
-		SelectObject(hdc, hOldPen);
-		DeleteObject(hBrush);
-		SelectObject(hdc, hOldBrush);
+		// ビットマップを転送
+		BitBlt(hdc, 0, 0, w, h, hdc_mem, 0, 0, SRCCOPY);
+		StretchBlt(hdc, w, 0, w * 2, h * 2, hdc_mem, 0, 0, w, h, SRCCOPY);
+
+		DeleteDC(hdc_mem);
+		DeleteObject(hBmp);
 
 		EndPaint(hWnd, &ps); // 描画処理を終了
 		break;

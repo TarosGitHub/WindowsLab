@@ -19,4 +19,14 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="bitmap01.rc">
+      <Filter>リソース ファイル</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="bitmap1.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+  </ItemGroup>
 </Project>
