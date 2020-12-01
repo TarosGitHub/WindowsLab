@@ -92,25 +92,34 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	HDC hdc;
 	PAINTSTRUCT ps;
+	HPEN hPen, hOldPen;
 	HBRUSH hBrush, hOldBrush;
-	POINT pt[4] = { {20, 20}, {20, 80}, {120, 50}, {100, 100} };
-	POINT poly[7] = { {150, 20}, {200, 25}, {210, 70}, {145, 65},
-	                  {180, 10}, {160, 90}, {205, 100} };
-	INT nC[2] = { 4, 3 };
 
 	switch (msg) {
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps); // デバイスコンテキストを取得
 
-		hBrush = CreateSolidBrush(RGB(255, 0, 0));
+		// 楕円を描画
+		Ellipse(hdc, 10, 10, 110, 60);
+
+		// 扇形を描画
+		Pie(hdc, 120, 10, 220, 60, 250, 20, 100, 90);
+
+		hPen = CreatePen(PS_DOT, 0, RGB(255, 0, 0));
+		hOldPen = (HPEN)SelectObject(hdc, hPen);
+		hBrush = (HBRUSH)GetStockObject(NULL_BRUSH);
 		hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
 
-		// 1つの多角形を描画
-		Polygon(hdc, pt, 4);
+		// 説明のための長方形を描画
+		Rectangle(hdc, 10, 10, 110, 60);
+		Rectangle(hdc, 120, 10, 220, 60);
+		MoveToEx(hdc, 170, 35, NULL);
+		LineTo(hdc, 250, 20);
+		MoveToEx(hdc, 170, 35, NULL);
+		LineTo(hdc, 100, 90);
 
-		// 2つの多角形を描画
-		PolyPolygon(hdc, poly, nC, 2);
-
+		DeleteObject(hPen);
+		SelectObject(hdc, hOldPen);
 		DeleteObject(hBrush);
 		SelectObject(hdc, hOldBrush);
 
