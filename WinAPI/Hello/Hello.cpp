@@ -90,41 +90,29 @@ BOOL InitInstance(HINSTANCE hInst, int nCmdShow)
 // ウィンドウプロシージャ
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	int iOldMode;
 	HDC hdc;
 	PAINTSTRUCT ps;
-	HPEN hPen, hOldPen;
 	HBRUSH hBrush, hOldBrush;
-	COLORREF crOldColor;
-	RECT rc1 = { 30, 30, 210, 50 };
-	RECT rc2 = { 30, 50, 210, 110 };
-	LPCTSTR lpszTxt1 = TEXT("Windows 太郎");
-	LPCTSTR lpszTxt2 = TEXT("猫でもわかる\nWindows\nプログラミング");
+	POINT pt[4] = { {20, 20}, {20, 80}, {120, 50}, {100, 100} };
+	POINT poly[7] = { {150, 20}, {200, 25}, {210, 70}, {145, 65},
+	                  {180, 10}, {160, 90}, {205, 100} };
+	INT nC[2] = { 4, 3 };
 
 	switch (msg) {
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps); // デバイスコンテキストを取得
 
-		hPen = CreatePen(PS_NULL, 0, RGB(0, 0, 0));
-		hOldPen = (HPEN)SelectObject(hdc, hPen);
-		hBrush = CreateSolidBrush(RGB(255, 200, 255));
+		hBrush = CreateSolidBrush(RGB(255, 0, 0));
 		hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
 
-		// 角の丸い四角形を描画
-		RoundRect(hdc, 20, 20, 220, 120, 10, 10);
+		// 1つの多角形を描画
+		Polygon(hdc, pt, 4);
 
-		// 文字列を描画
-		crOldColor = SetTextColor(hdc, RGB(0, 0, 255));
-		DrawText(hdc, lpszTxt1, -1, &rc1, DT_CENTER);
-		iOldMode = SetBkMode(hdc, TRANSPARENT);
-		DrawText(hdc, lpszTxt2, -1, &rc2, DT_CENTER);
+		// 2つの多角形を描画
+		PolyPolygon(hdc, poly, nC, 2);
 
-		DeleteObject(hPen);
 		DeleteObject(hBrush);
-		SelectObject(hdc, hOldPen);
 		SelectObject(hdc, hOldBrush);
-		SetTextColor(hdc, crOldColor);
-		SetBkMode(hdc, iOldMode);
 
 		EndPaint(hWnd, &ps); // 描画処理を終了
 		break;
